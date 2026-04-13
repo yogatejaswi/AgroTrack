@@ -1,0 +1,54 @@
+services:
+  # Backend API Service
+  - type: web
+    name: agrotrack-backend
+    runtime: node
+    rootDir: server
+    buildCommand: npm install --production
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DB_HOST
+        value: YOUR_DB_HOST_HERE
+      - key: DB_USER
+        value: YOUR_DB_USER_HERE
+      - key: DB_PASSWORD
+        value: YOUR_DB_PASSWORD_HERE
+      - key: DB_NAME
+        value: YOUR_DB_NAME_HERE
+      - key: JWT_SECRET
+        value: YOUR_JWT_SECRET_HERE
+      - key: FAST2SMS_API_KEY
+        value: YOUR_FAST2SMS_API_KEY_HERE
+      - key: EMAIL_USER
+        value: YOUR_EMAIL_USER_HERE
+      - key: EMAIL_PASS
+        value: YOUR_EMAIL_PASS_HERE
+
+  # Frontend Service
+  - type: web
+    name: agrotrack-frontend
+    runtime: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    rootDir: frontend
+    envVars:
+      - key: VITE_API_URL
+        value: YOUR_BACKEND_URL_HERE/api
+
+  # Client Service (if different from frontend)
+  - type: web
+    name: agrotrack-client
+    runtime: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    rootDir: client
+    envVars:
+      - key: VITE_API_URL
+        value: YOUR_BACKEND_URL_HERE/api
+
+# Note: Using external MySQL database (PlanetScale, AWS RDS, etc.)
+# Remove the databases section since we're using MySQL, not PostgreSQL

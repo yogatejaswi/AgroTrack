@@ -1,0 +1,123 @@
+# AgroTrack
+Farm Equipment Rental & Asset Management System
+
+## 🚀 Deployment on Render
+
+### Prerequisites
+- Node.js (v16 or higher)
+- npm or yarn
+- Render account (https://render.com)
+
+### Local Development Setup
+
+#### Backend
+1. Navigate to the `server` directory: `cd server`
+2. Install dependencies: `npm install`
+3. Copy environment file: `cp .env.example .env` and fill in your values
+4. Start the development server: `npm run dev` (Runs on `http://localhost:5000`)
+
+#### Frontend
+1. Navigate to the `frontend` directory: `cd frontend`
+2. Install dependencies: `npm install`
+3. Start the development server: `npm run dev` (Runs on `http://localhost:5173`)
+
+### Production Deployment
+
+#### Step 1: Database Setup
+Since Render provides PostgreSQL by default, you'll need to either:
+- Use Render's PostgreSQL database and migrate your MySQL schema
+- Use a cloud MySQL service like PlanetScale or AWS RDS
+
+For this deployment, we'll use Render's PostgreSQL. Update your database configuration accordingly.
+
+#### Step 2: Deploy to Render
+
+1. **Connect your GitHub repository** to Render
+2. **Create a new Blueprint** (multi-service deployment):
+   - Go to Render Dashboard → New → Blueprint
+   - Connect your GitHub repo: `joyboy-57-art/agrotrack`
+   - Render will automatically detect the `render.yaml` file
+
+3. **Configure Environment Variables** in Render:
+   ```
+   NODE_ENV=production
+   PORT=10000
+   DB_HOST=your_render_db_host
+   DB_USER=your_render_db_user
+   DB_PASSWORD=your_render_db_password
+   DB_NAME=your_render_db_name
+   JWT_SECRET=your_secure_jwt_secret
+   FAST2SMS_API_KEY=your_fast2sms_key
+   EMAIL_USER=your_email@gmail.com
+   EMAIL_PASS=your_app_password
+   VITE_API_URL=https://your-backend-service.onrender.com
+   ```
+
+4. **Deploy**: Click "Create Blueprint" and Render will deploy all services
+
+#### Step 3: Database Migration
+After deployment, run your database initialization scripts:
+- `init_db.sql`
+- `mysql_init.sql`
+
+### Services Overview
+
+- **Backend API**: `https://agrotrack-backend.onrender.com`
+- **Frontend**: `https://agrotrack-frontend.onrender.com`
+- **Client**: `https://agrotrack-client.onrender.com`
+- **Database**: Render PostgreSQL
+
+### Default Users (Passwords: `password123`)
+- `admin@agrotrack.com` (Admin)
+- `ramesh@agrotrack.com` (Equipment Owner)
+- `suresh@agrotrack.com` (Farmer)
+
+### Environment Variables Reference
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `PORT` | Server port | `10000` |
+| `DB_HOST` | Database host | `your-db-host.render.com` |
+| `DB_USER` | Database user | `your_db_user` |
+| `DB_PASSWORD` | Database password | `your_secure_password` |
+| `DB_NAME` | Database name | `agrotrack` |
+| `JWT_SECRET` | JWT signing secret | `your_jwt_secret` |
+| `FAST2SMS_API_KEY` | SMS service API key | `your_api_key` |
+| `EMAIL_USER` | Email address | `your@email.com` |
+| `EMAIL_PASS` | App password | `your_app_password` |
+
+### Troubleshooting
+
+1. **Build Failures**: Check the build logs in Render dashboard
+2. **Database Connection**: Ensure your database credentials are correct
+3. **CORS Issues**: Update `FRONTEND_URL` in environment variables
+4. **Port Issues**: Render assigns random ports, use the `PORT` env var
+
+### Support
+For issues with deployment, check:
+- Render documentation: https://docs.render.com/
+- Application logs in Render dashboard
+- GitHub repository issues
+
+---
+
+## Local Development (Alternative)
+
+### Prerequisites
+- Node.js (v16 or higher)
+- npm or yarn
+
+### Setup Instructions
+
+#### Backend
+1. Navigate to `server` directory
+2. Install dependencies: `npm install`
+3. Setup environment: copy `.env.example` to `.env`
+4. Start server: `npm run dev`
+
+#### Frontend
+1. Navigate to `frontend` directory
+2. Install dependencies: `npm install`
+3. Start dev server: `npm run dev`
+
+Enjoy! 🌾
