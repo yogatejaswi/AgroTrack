@@ -6,21 +6,28 @@ export const getDashboardAnalytics = async (req, res) => {
         const [bookings] = await pool.query("SELECT COUNT(*) as total FROM bookings");
         const [equipment] = await pool.query("SELECT COUNT(*) as total FROM equipment");
         const [revenue] = await pool.query("SELECT SUM(total_cost) as total FROM bookings WHERE status = 'confirmed'");
-        const [availEqResult] = await pool.query('SELECT COUNT(*) as total FROM equipment WHERE availability_status = "available"');
-        const [unavailEqResult] = await pool.query('SELECT COUNT(*) as total FROM equipment WHERE availability_status = "unavailable"');
+        const [availEqResult] = await pool.query('SELECT COUNT(*) as total FROM equipment WHERE availability_status = "available" OR availability_status = 1');
+        const [unavailEqResult] = await pool.query('SELECT COUNT(*) as total FROM equipment WHERE availability_status = "unavailable" OR availability_status = 0');
 
-        // Retaining chart and table data so the dashboard charts continue to work seamlessly
+        // Get monthly data for charts - generate last 6 months
         const [monthlyData] = await pool.query(`
             SELECT 
-                DATE_FORMAT(created_at, '%M') as month, 
-                SUM(total_cost) as revenue,
+                DATE_FORMAT(created_at, '%b') as month, 
+                COALESCE(SUM(total_cost), 0) as revenue,
                 COUNT(id) as bookings
             FROM bookings 
             WHERE status IN ('pending', 'confirmed') 
-            GROUP BY month, DATE_FORMAT(created_at, '%m')
-            ORDER BY DATE_FORMAT(created_at, '%m') DESC 
+            GROUP BY DATE_FORMAT(created_at, '%Y-%m'), DATE_FORMAT(created_at, '%b')
+            ORDER BY DATE_FORMAT(created_at, '%Y-%m') DESC 
             LIMIT 12
         `);
+
+        // Ensure we have at least some data for charts
+        const chartData = monthlyData.length > 0 ? monthlyData.reverse() : [
+            { month: 'Jan', revenue: 0, bookings: 0 },
+            { month: 'Feb', revenue: 0, bookings: 0 },
+            { month: 'Mar', revenue: 0, bookings: 0 }
+        ];
 
         const [equipmentList] = await pool.query(`
             SELECT 
@@ -40,7 +47,7 @@ export const getDashboardAnalytics = async (req, res) => {
             totalRevenue: revenue[0].total || 0,
             availableEquipment: availEqResult[0].total,
             unavailableEquipment: unavailEqResult[0].total,
-            monthlyData: monthlyData.reverse(),
+            monthlyData: chartData,
             equipmentList
         });
     } catch (error) {

@@ -7,6 +7,7 @@ import Loader from '../components/Loader';
 import { formatDate } from '../utils/formatDate';
 import { IMAGES, getEquipmentImage } from '../assets/images';
 import agricultureImage from '../assets/images/agriculture.png';
+import { isEquipmentManager } from '../utils/roles';
 
 const UserDashboard = () => {
     const { user } = useAuth();
@@ -30,6 +31,7 @@ const UserDashboard = () => {
     const activeBookings = bookings.filter(b => b.status === 'confirmed' || b.status === 'pending');
     const activeCount = bookings.filter(b => b.status === 'confirmed').length;
     const totalSpent = bookings.reduce((sum, b) => sum + Number(b.total_cost || 0), 0);
+    const newRentalPath = '/admin/equipment-management?new=1';
 
     const stats = [
         { label: 'Total Bookings', value: activeBookings.length, icon: <Package className="w-6 h-6" />, color: 'text-indigo-600', bg: 'bg-indigo-50' },
@@ -52,7 +54,7 @@ const UserDashboard = () => {
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
-                        <Link to="/marketplace" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl transition-all shadow-sm text-sm">
+                        <Link to={newRentalPath} className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl transition-all shadow-sm text-sm">
                             New Rental
                         </Link>
                     </div>
@@ -89,8 +91,8 @@ const UserDashboard = () => {
                             AgroTrack is a farm equipment rental platform that connects farmers with equipment owners. Farmers can browse machinery, book equipment, and manage rentals easily through a simple digital platform.
                         </p>
                         <div className="flex items-center gap-4">
-                            <Link to="/marketplace" className="bg-gray-900 hover:bg-black text-white font-bold px-6 py-3 rounded-xl transition-all shadow-sm">
-                                Explore Equipment
+                            <Link to={isEquipmentManager(user) ? '/admin/equipment-management' : '/marketplace'} className="bg-gray-900 hover:bg-black text-white font-bold px-6 py-3 rounded-xl transition-all shadow-sm">
+                                {isEquipmentManager(user) ? 'Manage Equipment' : 'Explore Equipment'}
                             </Link>
                             <Link to="/my-bookings" className="bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 font-bold px-6 py-3 rounded-xl transition-all shadow-sm">
                                 View My Bookings

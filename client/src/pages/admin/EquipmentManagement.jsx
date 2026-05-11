@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
     Tractor,
     Plus,
@@ -23,6 +24,7 @@ import { getEquipmentImage } from '../../assets/images';
 const CATEGORIES = ['Tractor', 'Harvester', 'Plough', 'Seed Drill', 'Irrigation', 'Rotavator', 'Sprayer', 'Cultivator', 'Thresher'];
 
 const EquipmentManagement = () => {
+    const [searchParams, setSearchParams] = useSearchParams();
     const [equipment, setEquipment] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
@@ -35,12 +37,19 @@ const EquipmentManagement = () => {
         price_per_day: '',
         location: '',
         image_url: '',
-        availability_status: 'Available'
+        availability_status: 'available'
     });
 
     useEffect(() => {
         fetchEquipment();
     }, []);
+
+    useEffect(() => {
+        if (searchParams.get('new') === '1') {
+            handleOpenModal();
+            setSearchParams({}, { replace: true });
+        }
+    }, [searchParams, setSearchParams]);
 
     const fetchEquipment = async () => {
         setLoading(true);
@@ -76,7 +85,7 @@ const EquipmentManagement = () => {
                 price_per_day: '',
                 location: '',
                 image_url: '',
-                availability_status: 'Available'
+                availability_status: 'available'
             });
         }
         setIsModalOpen(true);
@@ -121,7 +130,7 @@ const EquipmentManagement = () => {
     };
 
     const toggleStatus = async (item) => {
-        const newStatus = item.availability_status === 'Available' ? 'Unavailable' : 'Available';
+        const newStatus = item.availability_status === 'available' || item.availability_status === 'Available' ? 'unavailable' : 'available';
         try {
             await equipmentService.updateEquipment(item.id, { availability_status: newStatus });
             fetchEquipment();
@@ -138,8 +147,8 @@ const EquipmentManagement = () => {
 
     const stats = {
         total: equipment.length,
-        available: equipment.filter(e => e.availability_status === 'Available').length,
-        unavailable: equipment.filter(e => e.availability_status === 'Unavailable').length
+        available: equipment.filter(e => e.availability_status === 'available' || e.availability_status === 'Available').length,
+        unavailable: equipment.filter(e => e.availability_status === 'unavailable' || e.availability_status === 'Unavailable').length
     };
 
     if (loading && equipment.length === 0) return <Loader fullPage />;
@@ -257,11 +266,11 @@ const EquipmentManagement = () => {
                                         {item.location}
                                     </td>
                                     <td className="px-6 py-5">
-                                        <span className={`px-3 py-1 rounded-lg text-xs font-bold inline-flex items-center gap-1.5 ${item.availability_status === 'Available'
+                                        <span className={`px-3 py-1 rounded-lg text-xs font-bold inline-flex items-center gap-1.5 ${item.availability_status === 'available' || item.availability_status === 'Available'
                                                 ? 'bg-emerald-50 text-emerald-600'
                                                 : 'bg-red-50 text-red-600'
                                             }`}>
-                                            <span className={`w-1.5 h-1.5 rounded-full ${item.availability_status === 'Available' ? 'bg-emerald-600' : 'bg-red-600'
+                                            <span className={`w-1.5 h-1.5 rounded-full ${item.availability_status === 'available' || item.availability_status === 'Available' ? 'bg-emerald-600' : 'bg-red-600'
                                                 }`} />
                                             {item.availability_status}
                                         </span>
@@ -270,13 +279,13 @@ const EquipmentManagement = () => {
                                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <button
                                                 onClick={() => toggleStatus(item)}
-                                                title={item.availability_status === 'Available' ? 'Disable' : 'Enable'}
-                                                className={`p-2 rounded-xl transition-colors ${item.availability_status === 'Available'
+                                                title={item.availability_status === 'available' || item.availability_status === 'Available' ? 'Disable' : 'Enable'}
+                                                className={`p-2 rounded-xl transition-colors ${item.availability_status === 'available' || item.availability_status === 'Available'
                                                         ? 'text-gray-400 hover:bg-red-50 hover:text-red-500'
                                                         : 'text-gray-400 hover:bg-emerald-50 hover:text-emerald-500'
                                                     }`}
                                             >
-                                                {item.availability_status === 'Available' ? <PowerOff className="w-4 h-4" /> : <Power className="w-4 h-4" />}
+                                                {item.availability_status === 'available' || item.availability_status === 'Available' ? <PowerOff className="w-4 h-4" /> : <Power className="w-4 h-4" />}
                                             </button>
                                             <button
                                                 onClick={() => handleOpenModal(item)}
@@ -403,8 +412,8 @@ const EquipmentManagement = () => {
                                     <div className="flex gap-4 p-1 bg-gray-50 rounded-2xl">
                                         <button
                                             type="button"
-                                            onClick={() => setFormData(prev => ({ ...prev, availability_status: 'Available' }))}
-                                            className={`flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all ${formData.availability_status === 'Available'
+                                            onClick={() => setFormData(prev => ({ ...prev, availability_status: 'available' }))}
+                                            className={`flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all ${formData.availability_status === 'available' || formData.availability_status === 'Available'
                                                     ? 'bg-white text-emerald-600 shadow-sm'
                                                     : 'text-gray-400 hover:text-gray-600'
                                                 }`}
@@ -413,8 +422,8 @@ const EquipmentManagement = () => {
                                         </button>
                                         <button
                                             type="button"
-                                            onClick={() => setFormData(prev => ({ ...prev, availability_status: 'Unavailable' }))}
-                                            className={`flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all ${formData.availability_status === 'Unavailable'
+                                            onClick={() => setFormData(prev => ({ ...prev, availability_status: 'unavailable' }))}
+                                            className={`flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all ${formData.availability_status === 'unavailable' || formData.availability_status === 'Unavailable'
                                                     ? 'bg-white text-red-600 shadow-sm'
                                                     : 'text-gray-400 hover:text-gray-600'
                                                 }`}

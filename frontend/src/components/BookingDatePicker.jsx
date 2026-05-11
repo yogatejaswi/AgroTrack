@@ -67,7 +67,7 @@ const BookingDatePicker = ({ equipment, onSuccess }) => {
 
             <div className="space-y-6">
                 {/* Range Picker Container */}
-                <div className="border rounded-2xl border-gray-100 overflow-hidden bg-gray-50/50">
+                <div className="border rounded-2xl border-gray-100 overflow-visible bg-gray-50/50">
                     <div className="p-4 bg-white border-b border-gray-100 flex items-center justify-between">
                         <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Operation Window</span>
                         <CalendarDays className="w-4 h-4 text-agro-600" />

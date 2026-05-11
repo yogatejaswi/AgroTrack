@@ -1,7 +1,7 @@
 import React from 'react';
 import { cn } from '../lib/utils';
 
-const StatsCard = ({ title, value, icon: Icon, trend, color = "agro" }) => {
+const StatsCard = ({ title, value, icon: Icon, trend, color = "agro", onClick }) => {
     const colorClasses = {
         agro: "bg-agro-50 text-agro-600 shadow-agro-100",
         blue: "bg-blue-50 text-blue-600 shadow-blue-100",
@@ -11,7 +11,13 @@ const StatsCard = ({ title, value, icon: Icon, trend, color = "agro" }) => {
     };
 
     return (
-        <div className="card-premium p-6 group">
+        <div 
+            onClick={onClick}
+            className={cn(
+                "card-premium p-6 group",
+                onClick && "cursor-pointer hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
+            )}
+        >
             <div className="flex items-start justify-between">
                 <div>
                     <p className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-1">{title}</p>

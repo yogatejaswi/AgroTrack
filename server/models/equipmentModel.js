@@ -18,10 +18,10 @@ const Equipment = {
     },
 
     create: async (data) => {
-        const { name, category, price_per_day, location, description, image_url, availability_status = 'Available' } = data;
+        const { name, category, price_per_day, location, description, image_url, owner_id, availability_status = 'available' } = data;
         const [result] = await pool.query(
-            'INSERT INTO equipment (name, category, price_per_day, location, description, image_url, availability_status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [name, category, price_per_day, location, description, image_url, availability_status]
+            'INSERT INTO equipment (name, category, price_per_day, location, description, image_url, owner_id, availability_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [name, category, price_per_day, location, description, image_url, owner_id, availability_status]
         );
         return { id: result.insertId, ...data };
     },

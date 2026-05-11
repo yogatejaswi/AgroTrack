@@ -159,10 +159,9 @@ export const resetPassword = async (req, res) => {
 
         const user = await User.findByEmail(email);
         if (!user) {
-            return res.status(404).json({ message: 'User not found.' }); // Though they verified OTP, just in case
+            return res.status(404).json({ message: 'User not found.' });
         }
 
-        // We use the existing updateProfile which handles hashing if password is provided
         await User.updateProfile(user.id, {
             name: user.name,
             email: user.email,
@@ -170,7 +169,6 @@ export const resetPassword = async (req, res) => {
             password: newPassword
         });
 
-        // Cleanup OTP
         await OTP.deleteOTP(email);
 
         res.status(200).json({ message: 'Password reset successful.' });
@@ -178,5 +176,64 @@ export const resetPassword = async (req, res) => {
     } catch (error) {
         console.error('Reset Password Error:', error);
         res.status(500).json({ message: 'Failed to reset password.' });
+    }
+};
+
+// ----- Login via Email OTP -----
+
+export const sendLoginOtp = async (req, res) => {
+    try {
+        const { email } = req.body;
+        if (!email) return res.status(400).json({ message: 'Email is required' });
+
+        const user = await User.findByEmail(email);
+        if (!user) return res.status(404).json({ message: 'No account found with this email.' });
+
+        const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+        await OTP.saveOTP(email, otpCode);
+
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: 'AgroTrack Login OTP',
+            html: `
+                <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px;border:1px solid #e5e7eb;border-radius:16px;">
+                    <h2 style="color:#16a34a;">AgroTrack Login</h2>
+                    <p>Your one-time login code is:</p>
+                    <div style="font-size:36px;font-weight:900;letter-spacing:8px;color:#16a34a;padding:16px 0;">${otpCode}</div>
+                    <p style="color:#6b7280;font-size:13px;">Valid for 10 minutes. Do not share this code.</p>
+                </div>
+            `
+        });
+
+        res.status(200).json({ message: 'OTP sent to your email.' });
+    } catch (error) {
+        console.error('Send Login OTP Error:', error);
+        res.status(500).json({ message: 'Failed to send OTP.' });
+    }
+};
+
+export const verifyLoginOtp = async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+        if (!email || !otp) return res.status(400).json({ message: 'Email and OTP are required.' });
+
+        const result = await OTP.verifyOTP(email, otp);
+        if (result.status === 'expired') return res.status(400).json({ message: 'OTP expired. Request a new one.' });
+        if (result.status === 'invalid') return res.status(400).json({ message: 'Invalid OTP.' });
+
+        const user = await User.findByEmail(email);
+        await OTP.deleteOTP(email);
+
+        res.status(200).json({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            token: generateToken(user.id, user.role)
+        });
+    } catch (error) {
+        console.error('Verify Login OTP Error:', error);
+        res.status(500).json({ message: 'Failed to verify OTP.' });
     }
 };

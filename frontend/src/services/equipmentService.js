@@ -9,6 +9,10 @@ const equipmentService = {
         const response = await api.get(`/equipment/${id}`);
         return response.data;
     },
+    getEquipmentByOwner: async (ownerId) => {
+        const response = await api.get(`/equipment?ownerId=${ownerId}`);
+        return response.data;
+    },
     createEquipment: async (data) => {
         const response = await api.post('/equipment', data);
         return response.data;

@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { cn } from '../lib/utils'; // Assuming I'll create this utility or use a simple concat
+import { isEquipmentManager } from '../utils/roles';
 
 const SidebarItem = ({ to, icon: Icon, label, onClick }) => (
     <NavLink
@@ -59,7 +60,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         { to: "/profile", icon: User, label: "Profile" },
     ];
 
-    const links = user?.role === 'admin' ? adminLinks : farmerLinks;
+    const links = isEquipmentManager(user) ? adminLinks : farmerLinks;
 
     return (
         <>

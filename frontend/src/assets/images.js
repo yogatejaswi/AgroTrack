@@ -29,9 +29,13 @@ export const IMAGES = {
     byCategory: {
         'Tractors': 'https://images.unsplash.com/photo-1592982537447-6f2a6a0c7c18?auto=format&fit=crop&w=800&q=80',
         'Harvesters': 'https://images.unsplash.com/photo-1574943320219-553eb213f72d?auto=format&fit=crop&w=800&q=80',
-        'Seeding': 'https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=800&q=80',
+        'Plough': 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=800&q=80',
+        'Seed Drill': 'https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=800&q=80',
         'Irrigation': 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&w=800&q=80',
-        'Soil Prep': 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=800&q=80',
+        'Rotavator': 'https://images.unsplash.com/photo-1533637902604-1c5abcde8ee6?auto=format&fit=crop&w=800&q=80',
+        'Sprayer': 'https://images.unsplash.com/photo-1560493676-04071c5f467b?auto=format&fit=crop&w=800&q=80',
+        'Cultivator': 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=800&q=80',
+        'Thresher': 'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=800&q=80',
         'Default': 'https://images.unsplash.com/photo-1593926207032-41617e132910?auto=format&fit=crop&w=800&q=80',
     }
 };
@@ -40,10 +44,37 @@ export const IMAGES = {
  * Returns the best image for a given equipment item.
  * First uses image_url from DB, then falls back to category, then default.
  */
+const CATEGORY_ALIASES = {
+    tractor: 'Tractors',
+    tractors: 'Tractors',
+    harvester: 'Harvesters',
+    harvesters: 'Harvesters',
+    plough: 'Plough',
+    'seed drill': 'Seed Drill',
+    seeder: 'Seed Drill',
+    irrigation: 'Irrigation',
+    rotavator: 'Rotavator',
+    sprayer: 'Sprayer',
+    cultivator: 'Cultivator',
+    thresher: 'Thresher'
+};
+
+const normalizeCategory = (category = '') => {
+    const key = category?.toString().trim().toLowerCase();
+    return CATEGORY_ALIASES[key] || category;
+};
+
+const isValidImageUrl = (url) => {
+    if (!url || typeof url !== 'string') return false;
+    const trimmed = url.trim();
+    return /^(https?:\/\/|\/)/i.test(trimmed);
+};
+
 export const getEquipmentImage = (equipment) => {
-    if (equipment?.image_url) return equipment.image_url;
-    if (equipment?.category && IMAGES.byCategory[equipment.category]) {
-        return IMAGES.byCategory[equipment.category];
+    if (isValidImageUrl(equipment?.image_url)) return equipment.image_url;
+    const normalizedCategory = normalizeCategory(equipment?.category);
+    if (normalizedCategory && IMAGES.byCategory[normalizedCategory]) {
+        return IMAGES.byCategory[normalizedCategory];
     }
     return IMAGES.byCategory['Default'];
 };

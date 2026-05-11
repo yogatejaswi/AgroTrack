@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Tractor, LogOut, Menu, X, User } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { isEquipmentManager } from '../utils/roles';
 
 const Navbar = () => {
     const { user, logout } = useAuth();
@@ -21,7 +22,7 @@ const Navbar = () => {
             { name: 'Home', path: '/' },
             { name: 'Marketplace', path: '/marketplace' }
         ];
-    } else if (user.role === 'admin') {
+    } else if (isEquipmentManager(user)) {
         navLinks = [
             { name: 'Dashboard', path: '/admin-dashboard' },
             { name: 'Equipment Management', path: '/admin/equipment-management' },
@@ -42,7 +43,7 @@ const Navbar = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-16">
                     <div className="flex items-center">
-                        <Link to={user ? (user.role === 'admin' ? '/admin-dashboard' : '/farmer-dashboard') : '/'} className="flex items-center">
+                        <Link to={user ? (isEquipmentManager(user) ? '/admin-dashboard' : '/farmer-dashboard') : '/'} className="flex items-center">
                             <Tractor className="h-8 w-8 text-agro-600 mr-2" />
                             <span className="text-2xl font-bold text-gray-900 tracking-tight">Agro<span className="text-agro-600">Track</span></span>
                         </Link>

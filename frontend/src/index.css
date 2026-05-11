@@ -25,7 +25,9 @@
 
 /* Custom Datepicker Styles */
 .react-datepicker {
-  @apply rounded-2xl border-none shadow-none font-sans !important;
+  @apply rounded-2xl border-none shadow-lg font-sans !important;
+  z-index: 50 !important;
+  position: relative !important;
 }
 
 .react-datepicker__header {

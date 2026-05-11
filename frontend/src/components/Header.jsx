@@ -3,6 +3,7 @@ import { Menu, Search, Bell, User as UserIcon, ChevronDown } from 'lucide-react'
 import { useAuth } from '../hooks/useAuth';
 import { useNotifications } from '../hooks/useNotifications';
 import { useLocation } from 'react-router-dom';
+import { getManagerLabel } from '../utils/roles';
 
 const Header = ({ toggleSidebar }) => {
     const { user } = useAuth();
@@ -122,7 +123,7 @@ const Header = ({ toggleSidebar }) => {
                     </div>
                     <div className="hidden lg:block text-left">
                         <p className="text-sm font-bold text-gray-900 leading-none mb-1">{user?.name}</p>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 leading-none">{user?.role === 'admin' ? 'Administrator' : 'Farmer'}</p>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 leading-none">{getManagerLabel(user)}</p>
                     </div>
                     <ChevronDown className="w-4 h-4 text-gray-400 group-hover:text-agro-600 transition-colors" />
                 </div>

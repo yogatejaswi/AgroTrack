@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Package, Clock, IndianRupee, AlertCircle, ArrowUpRight, Search, FileText, CheckCircle, XCircle } from 'lucide-react';
+import { Calendar, Package, Clock, IndianRupee, AlertCircle, ArrowUpRight, Search, FileText, CheckCircle, XCircle, CreditCard } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import bookingService from '../services/bookingService';
 import { SkeletonLoader } from '../components/SkeletonLoader';
@@ -9,6 +9,7 @@ import HeroBanner from '../components/HeroBanner';
 import ModernTable from '../components/ModernTable';
 import { cn } from '../lib/utils';
 import { Link } from 'react-router-dom';
+import PaymentQR from '../components/PaymentQR';
 
 const MyBookings = () => {
     const { user } = useAuth();
@@ -17,6 +18,7 @@ const MyBookings = () => {
     const [actionLoading, setActionLoading] = useState(false);
     const [cancelModalOpen, setCancelModalOpen] = useState(false);
     const [selectedBooking, setSelectedBooking] = useState(null);
+    const [paymentModalOpen, setPaymentModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchBookings = async () => {
@@ -35,6 +37,11 @@ const MyBookings = () => {
     const handleCancelRequest = (booking) => {
         setSelectedBooking(booking);
         setCancelModalOpen(true);
+    };
+
+    const handlePaymentRequest = (booking) => {
+        setSelectedBooking(booking);
+        setPaymentModalOpen(true);
     };
 
     const confirmCancellation = async () => {
@@ -113,6 +120,14 @@ const MyBookings = () => {
                     <Link to={`/equipment/${item.equipment_id}`} className="p-2 rounded-xl bg-gray-50 text-gray-400 hover:text-agro-600 hover:bg-agro-50 transition-colors">
                         <ArrowUpRight className="w-5 h-5" />
                     </Link>
+                    {item.status === 'pending' && (
+                        <button
+                            onClick={() => handlePaymentRequest(item)}
+                            className="text-[10px] font-black uppercase tracking-widest text-agro-600 hover:text-agro-700 px-3 py-1.5 rounded-xl hover:bg-agro-50 transition-colors flex items-center gap-1"
+                        >
+                            <CreditCard className="w-4 h-4" /> Pay Now
+                        </button>
+                    )}
                     {(item.status === 'pending' || item.status === 'confirmed') && (
                         <button
                             onClick={() => handleCancelRequest(item)}
@@ -171,6 +186,19 @@ const MyBookings = () => {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Payment Modal */}
+            {paymentModalOpen && selectedBooking && (
+                <PaymentQR
+                    booking={selectedBooking}
+                    equipment={selectedBooking}
+                    onSuccess={() => {
+                        setPaymentModalOpen(false);
+                        setBookings(prev => prev.map(b => b.id === selectedBooking.id ? { ...b, status: 'confirmed' } : b));
+                    }}
+                    onCancel={() => setPaymentModalOpen(false)}
+                />
             )}
         </div>
     );

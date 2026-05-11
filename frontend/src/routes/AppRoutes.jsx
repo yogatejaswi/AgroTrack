@@ -24,14 +24,17 @@ import PaymentsManagement from '../pages/admin/PaymentsManagement';
 import Profile from '../pages/Profile';
 import MyBookings from '../pages/MyBookings';
 import Loader from '../components/Loader';
+import GoogleAuthSuccess from '../pages/GoogleAuthSuccess';
+import NewRental from '../pages/NewRental';
+import { isAdmin } from '../utils/roles';
 
 const PrivateRoute = ({ children, adminOnly = false, farmerOnly = false }) => {
     const { user, loading } = useAuth();
 
     if (loading) return <Loader fullPage />;
     if (!user) return <Navigate to="/login" replace />;
-    if (adminOnly && user.role !== 'admin') return <Navigate to="/farmer-dashboard" replace />;
-    if (farmerOnly && user.role === 'admin') return <Navigate to="/admin-dashboard" replace />;
+    if (adminOnly && !isAdmin(user)) return <Navigate to="/farmer-dashboard" replace />;
+    if (farmerOnly && isAdmin(user)) return <Navigate to="/admin-dashboard" replace />;
 
     return children;
 };
@@ -39,7 +42,7 @@ const PrivateRoute = ({ children, adminOnly = false, farmerOnly = false }) => {
 const BlockAdminRoute = ({ children }) => {
     const { user, loading } = useAuth();
     if (loading) return <Loader fullPage />;
-    if (user && user.role === 'admin') return <Navigate to="/admin-dashboard" replace />;
+    if (user && isAdmin(user)) return <Navigate to="/admin-dashboard" replace />;
     return children;
 };
 
@@ -53,8 +56,10 @@ const AppRoutes = () => {
                 <Route path="forgot-password" element={<ForgotPassword />} />
                 <Route path="verify-otp" element={<VerifyOTP />} />
                 <Route path="reset-password" element={<ResetPassword />} />
-                <Route path="marketplace" element={<BlockAdminRoute><EquipmentList /></BlockAdminRoute>} />
-                <Route path="equipment/:id" element={<BlockAdminRoute><EquipmentDetails /></BlockAdminRoute>} />
+                <Route path="auth/google/success" element={<GoogleAuthSuccess />} />
+                <Route path="marketplace" element={<EquipmentList />} />
+                <Route path="new-rental" element={<PrivateRoute><NewRental /></PrivateRoute>} />
+                <Route path="equipment/:id" element={<EquipmentDetails />} />
                 <Route path="booking/:id" element={
                     <PrivateRoute farmerOnly>
                         <BookingPage />
@@ -78,7 +83,7 @@ const AppRoutes = () => {
                     </PrivateRoute>
                 } />
                 <Route path="admin/equipment-management" element={
-                    <PrivateRoute adminOnly>
+                    <PrivateRoute>
                         <EquipmentManagement />
                     </PrivateRoute>
                 } />
@@ -116,7 +121,7 @@ const AppRoutes = () => {
 const DashboardRedirect = () => {
     const { user } = useAuth();
     if (!user) return <Navigate to="/login" replace />;
-    if (user.role === 'admin') return <Navigate to="/admin-dashboard" replace />;
+    if (isAdmin(user)) return <Navigate to="/admin-dashboard" replace />;
     return <Navigate to="/farmer-dashboard" replace />;
 };
 

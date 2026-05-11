@@ -6,6 +6,7 @@ import bookingService from '../services/bookingService';
 import Loader from '../components/Loader';
 import { formatDate } from '../utils/formatDate';
 import { IMAGES, getEquipmentImage } from '../assets/images';
+import { isEquipmentManager } from '../utils/roles';
 
 const MyBookings = () => {
     const { user } = useAuth();
@@ -14,6 +15,7 @@ const MyBookings = () => {
     const [actionLoading, setActionLoading] = useState(false);
     const [cancelModalOpen, setCancelModalOpen] = useState(false);
     const [selectedBooking, setSelectedBooking] = useState(null);
+    const newRentalPath = '/admin/equipment-management?new=1';
 
     useEffect(() => {
         const fetchBookings = async () => {
@@ -65,7 +67,7 @@ const MyBookings = () => {
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
-                        <Link to="/marketplace" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl transition-all shadow-sm text-sm">
+                        <Link to={newRentalPath} className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-xl transition-all shadow-sm text-sm">
                             New Rental
                         </Link>
                     </div>

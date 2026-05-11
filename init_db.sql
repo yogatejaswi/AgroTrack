@@ -20,7 +20,9 @@ CREATE TABLE IF NOT EXISTS equipment (
     description TEXT,
     availability_status BOOLEAN DEFAULT TRUE,
     image_url VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    owner_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS bookings (

@@ -12,7 +12,7 @@ const router = express.Router();
 
 router.get('/', getEquipment);
 router.get('/:id', getEquipmentById);
-router.post('/', protect, admin, createEquipment);
+router.post('/', protect, createEquipment);
 router.put('/:id', protect, admin, updateEquipment);
 router.delete('/:id', protect, admin, deleteEquipment);
 

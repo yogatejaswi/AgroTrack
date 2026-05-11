@@ -21,6 +21,22 @@ export const fixMobileColumn = async () => {
             ALTER TABLE equipment 
             MODIFY COLUMN availability_status ENUM('available', 'unavailable') DEFAULT 'available'
         `);
+        
+        // Add owner_id column if it doesn't exist
+        try {
+            await pool.query(`
+                ALTER TABLE equipment 
+                ADD COLUMN owner_id INT,
+                ADD FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE SET NULL
+            `);
+            console.log('✅ Added owner_id column to equipment table.');
+        } catch (err) {
+            // Column might already exist, that's fine
+            if (!err.message.includes('Duplicate column')) {
+                console.warn('⚠️ Could not add owner_id column:', err.message);
+            }
+        }
+        
         console.log('✅ Equipment table schema aligned.');
 
         // Ensure bookings table schema

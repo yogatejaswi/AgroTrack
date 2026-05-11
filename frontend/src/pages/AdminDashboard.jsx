@@ -15,9 +15,11 @@ import { useAuth } from '../hooks/useAuth';
 import api from '../services/api';
 import StatsCard from '../components/StatsCard';
 import Loader from '../components/Loader';
+import { useNavigate } from 'react-router-dom';
 
 const AdminDashboard = () => {
     const { user } = useAuth();
+    const navigate = useNavigate();
     const [analytics, setAnalytics] = useState(null);
     const [error, setError] = useState('');
 
@@ -42,9 +44,17 @@ const AdminDashboard = () => {
 
     return (
         <div className="animate-in fade-in duration-700">
-            <div className="mb-8">
-                <h2 className="text-3xl font-black text-gray-900 tracking-tight">System Overview</h2>
-                <p className="text-gray-500 font-medium">Real-time performance metrics and equipment health.</p>
+            <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 className="text-3xl font-black text-gray-900 tracking-tight">System Overview</h2>
+                    <p className="text-gray-500 font-medium">Real-time performance metrics and equipment health.</p>
+                </div>
+                <button
+                    onClick={() => navigate('/admin/equipment-management?new=1')}
+                    className="bg-agro-600 hover:bg-agro-700 text-white font-bold px-6 py-3 rounded-2xl transition-all shadow-lg shadow-agro-100 flex items-center justify-center gap-2"
+                >
+                    <Tractor className="w-5 h-5" /> Add Equipment
+                </button>
             </div>
 
             {/* Quick Stats Grid */}
@@ -151,7 +161,10 @@ const AdminDashboard = () => {
                         <h3 className="text-xl font-bold text-gray-900 font-['Outfit']">Equipment Inventory</h3>
                         <p className="text-sm text-gray-400 font-medium">Monitoring status and ownership</p>
                     </div>
-                    <button className="text-sm font-bold text-agro-600 hover:text-agro-700 transition-colors">
+                    <button
+                        onClick={() => navigate('/admin/equipment-management')}
+                        className="text-sm font-bold text-agro-600 hover:text-agro-700 transition-colors"
+                    >
                         View All
                     </button>
                 </div>

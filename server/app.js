@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import passport from './config/passport.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 
 // Routes
@@ -22,9 +23,8 @@ const app = express();
 
 app.use(express.json());
 app.use(cors());
-app.use(helmet({
-    crossOriginResourcePolicy: false,
-}));
+app.use(helmet({ crossOriginResourcePolicy: false }));
+app.use(passport.initialize());
 
 // Static folder for uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));

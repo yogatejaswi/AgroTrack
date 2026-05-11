@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { LogIn, Mail, Lock, Tractor, AlertCircle, Eye, EyeOff, CheckCircle } from 'lucide-react';
+import { LogIn, Mail, Lock, Tractor, AlertCircle, Eye, EyeOff, CheckCircle, Chrome } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import authService from '../services/authService';
 
@@ -10,6 +10,11 @@ const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [loginMode, setLoginMode] = useState('password'); // 'password' or 'otp'
+    const [otpEmail, setOtpEmail] = useState('');
+    const [otp, setOtp] = useState('');
+    const [otpSent, setOtpSent] = useState(false);
+    const [otpLoading, setOtpLoading] = useState(false);
     const { login } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
@@ -28,6 +33,39 @@ const Login = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleSendOtp = async (e) => {
+        e.preventDefault();
+        setError('');
+        setOtpLoading(true);
+        try {
+            await authService.sendLoginOtp(otpEmail);
+            setOtpSent(true);
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to send OTP.');
+        } finally {
+            setOtpLoading(false);
+        }
+    };
+
+    const handleVerifyOtp = async (e) => {
+        e.preventDefault();
+        setError('');
+        setOtpLoading(true);
+        try {
+            const data = await authService.verifyLoginOtp(otpEmail, otp);
+            login(data);
+            navigate('/dashboard');
+        } catch (err) {
+            setError(err.response?.data?.message || 'Invalid OTP.');
+        } finally {
+            setOtpLoading(false);
+        }
+    };
+
+    const handleGoogleLogin = () => {
+        window.location.href = '/api/auth/google';
     };
 
     return (

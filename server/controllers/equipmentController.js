@@ -4,7 +4,7 @@ import pool from '../config/db.js';
 
 export const getEquipment = async (req, res) => {
     try {
-        const { keyword, isAdmin } = req.query;
+        const { keyword, isAdmin, ownerId } = req.query;
         let sql = 'SELECT * FROM equipment';
         let params = [];
         let conditions = [];
@@ -14,10 +14,14 @@ export const getEquipment = async (req, res) => {
             params.push(`%${keyword}%`, `%${keyword}%`, `%${keyword}%`);
         }
 
-        // If not admin, only fetch available equipment for the marketplace
-        // Handle both BOOLEAN (1) and ENUM ('available') column types
-        if (isAdmin !== 'true') {
-            conditions.push('(availability_status = "available" OR availability_status = 1)');
+        // If ownerId is provided, only fetch that owner's equipment
+        if (ownerId) {
+            conditions.push('owner_id = ?');
+            params.push(ownerId);
+        } else if (isAdmin !== 'true') {
+            // If not admin and no ownerId, only fetch available equipment for the marketplace
+            // Handle both BOOLEAN (1) and ENUM ('available') column types
+            conditions.push('(availability_status = "available" OR availability_status = "Available" OR availability_status = 1)');
         }
 
         if (conditions.length > 0) {
@@ -45,7 +49,10 @@ export const getEquipmentById = async (req, res) => {
 
 export const createEquipment = async (req, res) => {
     try {
-        const equipment = await Equipment.create(req.body);
+        const equipment = await Equipment.create({
+            ...req.body,
+            owner_id: req.user.id
+        });
         res.status(201).json(equipment);
     } catch (error) {
         res.status(500).json({ message: error.message });

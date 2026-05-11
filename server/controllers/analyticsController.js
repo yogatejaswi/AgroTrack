@@ -2,42 +2,45 @@ import pool from '../config/db.js';
 
 export const getAdminStats = async (req, res) => {
     try {
-        const [totalEquipment] = await pool.query('SELECT COUNT(*) as count FROM equipment');
-        const [totalBookings] = await pool.query('SELECT COUNT(*) as count FROM bookings WHERE status IN ("pending", "confirmed")');
-        const [revenue] = await pool.query('SELECT SUM(total_cost) as total FROM bookings WHERE status IN ("pending", "confirmed")');
-        const [activeRentals] = await pool.query('SELECT COUNT(*) as count FROM bookings WHERE status = "confirmed" AND end_date >= CURDATE()');
+        // Get total counts
+        const [totalEquipmentResult] = await pool.query('SELECT COUNT(*) as count FROM equipment');
+        const [totalUsersResult] = await pool.query('SELECT COUNT(*) as count FROM users');
+        const [totalBookingsResult] = await pool.query('SELECT COUNT(*) as count FROM bookings WHERE status IN ("pending", "confirmed")');
+        const [revenueResult] = await pool.query('SELECT SUM(total_cost) as total FROM bookings WHERE status IN ("pending", "confirmed")');
+        const [availableEquipmentResult] = await pool.query('SELECT COUNT(*) as count FROM equipment WHERE availability_status = "available" OR availability_status = 1');
+        const [unavailableEquipmentResult] = await pool.query('SELECT COUNT(*) as count FROM equipment WHERE availability_status = "unavailable" OR availability_status = 0');
 
-        // Analytics data
-        const [mostRented] = await pool.query(
-            `SELECT e.name, COUNT(b.id) as count 
-             FROM bookings b 
-             JOIN equipment e ON b.equipment_id = e.id 
-             WHERE b.status IN ('pending', 'confirmed')
-             GROUP BY e.id 
-             ORDER BY count DESC 
-             LIMIT 5`
-        );
+        // Get equipment list
+        const [equipmentList] = await pool.query('SELECT id, name, category, price_per_day, availability_status FROM equipment LIMIT 10');
 
-        const [monthlyRevenue] = await pool.query(
-            `SELECT DATE_FORMAT(created_at, '%Y-%m') as month, SUM(total_cost) as revenue 
+        // Get monthly data for charts
+        const [monthlyData] = await pool.query(
+            `SELECT 
+                DATE_FORMAT(created_at, '%b') as month,
+                SUM(total_cost) as revenue,
+                COUNT(*) as bookings
              FROM bookings 
              WHERE status IN ('pending', 'confirmed') 
-             GROUP BY month 
-             ORDER BY month DESC 
+             GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+             ORDER BY created_at DESC
              LIMIT 6`
         );
 
         res.json({
-            stats: {
-                totalEquipment: totalEquipment[0].count,
-                totalBookings: totalBookings[0].count,
-                revenue: revenue[0].total || 0,
-                activeRentals: activeRentals[0].count
-            },
-            charts: {
-                mostRented,
-                monthlyRevenue: monthlyRevenue.reverse()
-            }
+            totalUsers: totalUsersResult[0].count,
+            totalEquipment: totalEquipmentResult[0].count,
+            totalBookings: totalBookingsResult[0].count,
+            totalRevenue: revenueResult[0].total || 0,
+            availableEquipment: availableEquipmentResult[0].count,
+            unavailableEquipment: unavailableEquipmentResult[0].count,
+            equipmentList: equipmentList.map(eq => ({
+                id: eq.id,
+                name: eq.name,
+                category: eq.category,
+                price_per_day: eq.price_per_day,
+                availabilityStatus: eq.availability_status === 'available' || eq.availability_status === 1 ? 'available' : 'unavailable'
+            })),
+            monthlyData: monthlyData.reverse()
         });
     } catch (error) {
         console.error("Admin stats fetch failed:", error);

@@ -15,6 +15,11 @@ const EquipmentDetails = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        if (!user) {
+            navigate('/login', { state: { message: 'Please login to view equipment details and make bookings.' } });
+            return;
+        }
+
         const fetchDetails = async () => {
             try {
                 const data = await equipmentService.getEquipmentById(id);
@@ -26,7 +31,7 @@ const EquipmentDetails = () => {
             }
         };
         fetchDetails();
-    }, [id, navigate]);
+    }, [id, navigate, user]);
 
     if (loading) return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
@@ -149,7 +154,7 @@ const EquipmentDetails = () => {
 
                     {/* Right Column - Booking Widget Sidebar */}
                     <div className="lg:col-span-5 xl:col-span-4 mt-16 lg:mt-0 relative">
-                        <div className="sticky top-28 bg-white p-10 border border-gray-100/50 rounded-[2.5rem] shadow-2xl overflow-visible">
+                    <div className="sticky top-28 bg-white p-10 border border-gray-100/50 rounded-[2.5rem] shadow-2xl overflow-visible">
                             <div className="flex items-baseline justify-between mb-10">
                                 <div className="flex items-baseline gap-2">
                                     <span className="text-4xl font-black text-gray-900 italic">

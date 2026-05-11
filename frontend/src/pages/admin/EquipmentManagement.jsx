@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Tractor, Plus, Edit, Trash2, CheckCircle, XCircle } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 import ModernTable from '../../components/ModernTable';
 import api from '../../services/api';
 import { cn } from '../../lib/utils';
 
 const EquipmentManagement = () => {
+    const { user } = useAuth();
+    const [searchParams, setSearchParams] = useSearchParams();
     const [equipment, setEquipment] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -20,10 +24,32 @@ const EquipmentManagement = () => {
         image_url: ''
     });
 
+    const CATEGORY_ALIASES = {
+        tractor: 'Tractors',
+        tractors: 'Tractors',
+        harvester: 'Harvesters',
+        harvesters: 'Harvesters',
+        plough: 'Plough',
+        'seed drill': 'Seed Drill',
+        seeder: 'Seed Drill',
+        irrigation: 'Irrigation',
+        rotavator: 'Rotavator',
+        sprayer: 'Sprayer',
+        cultivator: 'Cultivator',
+        thresher: 'Thresher'
+    };
+
+    const normalizeCategory = (value) => {
+        if (!value) return '';
+        const key = value.toString().trim().toLowerCase();
+        return CATEGORY_ALIASES[key] || value;
+    };
+
     const fetchEquipment = async () => {
         try {
             setLoading(true);
-            const { data } = await api.get('/equipment?isAdmin=true');
+            // Fetch only the current user's equipment
+            const { data } = await api.get(`/equipment?ownerId=${user.id}`);
             setEquipment(data);
         } catch (err) {
             console.error('Error fetching equipment:', err);
@@ -33,8 +59,19 @@ const EquipmentManagement = () => {
     };
 
     useEffect(() => {
-        fetchEquipment();
-    }, []);
+        if (user?.id) {
+            fetchEquipment();
+        }
+    }, [user?.id]);
+
+    useEffect(() => {
+        if (searchParams.get('new') === '1') {
+            setEditingId(null);
+            setFormData({ name: '', category: '', price_per_day: '', location: '', description: '', image_url: '' });
+            setIsModalOpen(true);
+            setSearchParams({}, { replace: true });
+        }
+    }, [searchParams, setSearchParams]);
 
     const handleDelete = async (id) => {
         if (!window.confirm("Are you sure you want to delete this equipment?")) return;
@@ -50,10 +87,16 @@ const EquipmentManagement = () => {
         e.preventDefault();
         setSaving(true);
         try {
+            const payload = {
+                ...formData,
+                category: normalizeCategory(formData.category),
+                availability_status: 'available'
+            };
+
             if (editingId) {
-                await api.put(`/equipment/${editingId}`, formData);
+                await api.put(`/equipment/${editingId}`, payload);
             } else {
-                await api.post('/equipment', formData);
+                await api.post('/equipment', payload);
             }
             setIsModalOpen(false);
             setEditingId(null);
@@ -183,7 +226,8 @@ const EquipmentManagement = () => {
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">Category</label>
-                                    <input type="text" required value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} className="input-premium w-full bg-gray-50 border-gray-100 px-4" placeholder="Tractor / Harvester" />
+                                    <input type="text" required value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} className="input-premium w-full bg-gray-50 border-gray-100 px-4" placeholder="Tractors, Harvesters, Plough..." />
+                                    <p className="text-[10px] text-gray-400">Use one of: Tractors, Harvesters, Plough, Seed Drill, Irrigation, Rotavator, Sprayer, Cultivator, Thresher.</p>
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">Daily Rate (₹)</label>
