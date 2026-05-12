@@ -16,7 +16,7 @@ export const getEquipment = async (req, res) => {
 
         // If ownerId is provided, only fetch that owner's equipment
         if (ownerId) {
-            conditions.push('owner_id = ?');
+            conditions.push('(owner_id = ? OR owner_id IS NULL)');
             params.push(ownerId);
         } else if (isAdmin !== 'true') {
             // If not admin and no ownerId, only fetch available equipment for the marketplace
@@ -72,6 +72,35 @@ export const deleteEquipment = async (req, res) => {
     try {
         await Equipment.delete(req.params.id);
         res.json({ message: 'Equipment deleted' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+export const assignEquipmentToUser = async (req, res) => {
+    try {
+        const { equipmentId, userId } = req.body;
+
+        if (!equipmentId || !userId) {
+            return res.status(400).json({ message: 'equipmentId and userId are required' });
+        }
+
+        // Verify equipment exists
+        const [equipment] = await pool.query('SELECT id FROM equipment WHERE id = ?', [equipmentId]);
+        if (equipment.length === 0) {
+            return res.status(404).json({ message: 'Equipment not found' });
+        }
+
+        // Verify user exists
+        const [user] = await pool.query('SELECT id FROM users WHERE id = ?', [userId]);
+        if (user.length === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Update equipment owner
+        await pool.query('UPDATE equipment SET owner_id = ? WHERE id = ?', [userId, equipmentId]);
+
+        res.json({ message: 'Equipment assigned successfully', equipmentId, userId });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

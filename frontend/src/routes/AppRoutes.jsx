@@ -23,6 +23,7 @@ import UsersManagement from '../pages/admin/UsersManagement';
 import PaymentsManagement from '../pages/admin/PaymentsManagement';
 import Profile from '../pages/Profile';
 import MyBookings from '../pages/MyBookings';
+import EquipmentTracking from '../pages/EquipmentTracking';
 import Loader from '../components/Loader';
 import GoogleAuthSuccess from '../pages/GoogleAuthSuccess';
 import NewRental from '../pages/NewRental';
@@ -75,6 +76,11 @@ const AppRoutes = () => {
                 <Route path="my-bookings" element={
                     <PrivateRoute>
                         <MyBookings />
+                    </PrivateRoute>
+                } />
+                <Route path="equipment-tracking" element={
+                    <PrivateRoute>
+                        <EquipmentTracking />
                     </PrivateRoute>
                 } />
                 <Route path="admin-dashboard" element={

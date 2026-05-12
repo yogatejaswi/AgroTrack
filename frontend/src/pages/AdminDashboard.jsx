@@ -65,6 +65,7 @@ const AdminDashboard = () => {
                     icon={IndianRupee}
                     color="agro"
                     trend={{ value: 15, isUp: true }}
+                    onClick={() => navigate('/admin/payments')}
                 />
                 <StatsCard
                     title="Active Bookings"
@@ -72,6 +73,7 @@ const AdminDashboard = () => {
                     icon={ShoppingCart}
                     color="purple"
                     trend={{ value: 5, isUp: true }}
+                    onClick={() => navigate('/admin/order-confirmation')}
                 />
                 <StatsCard
                     title="Total Users"
@@ -79,12 +81,14 @@ const AdminDashboard = () => {
                     icon={Users}
                     color="blue"
                     trend={{ value: 12, isUp: true }}
+                    onClick={() => navigate('/admin/users')}
                 />
                 <StatsCard
                     title="Available Gear"
                     value={availableEquipment}
                     icon={Tractor}
                     color="orange"
+                    onClick={() => navigate('/admin/equipment-management')}
                 />
             </div>
 

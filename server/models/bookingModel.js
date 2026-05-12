@@ -22,7 +22,7 @@ const Booking = {
 
     getAll: async () => {
         const [rows] = await pool.query(
-            `SELECT b.*, u.name as user_name, e.name as equipment_name 
+            `SELECT b.*, u.name as user_name, u.email as user_email, e.name as equipment_name 
              FROM bookings b
              JOIN users u ON b.user_id = u.id
              JOIN equipment e ON b.equipment_id = e.id

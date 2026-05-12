@@ -4,7 +4,8 @@ import {
     getEquipmentById,
     createEquipment,
     updateEquipment,
-    deleteEquipment
+    deleteEquipment,
+    assignEquipmentToUser
 } from '../controllers/equipmentController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
 
@@ -15,5 +16,6 @@ router.get('/:id', getEquipmentById);
 router.post('/', protect, createEquipment);
 router.put('/:id', protect, admin, updateEquipment);
 router.delete('/:id', protect, admin, deleteEquipment);
+router.post('/assign', protect, admin, assignEquipmentToUser);
 
 export default router;

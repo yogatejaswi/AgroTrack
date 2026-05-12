@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, ChevronUp, ChevronDown, MoreVertical } from 'lucide-react';
+import { Search, ChevronUp, ChevronDown, MoreVertical, CheckCircle, XCircle, Trash2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 /**
@@ -9,10 +9,12 @@ import { cn } from '../lib/utils';
  * @param {string} searchPlaceholder - Placeholder for search input
  * @param {string} title - Table title
  * @param {boolean} loading - Loading state
+ * @param {Function} onActionClick - Callback for action button clicks
  */
-const ModernTable = ({ columns, data, searchPlaceholder = "Search...", title, loading }) => {
+const ModernTable = ({ columns, data, searchPlaceholder = "Search...", title, loading, onActionClick }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+    const [openMenuId, setOpenMenuId] = useState(null);
 
     const handleSort = (key) => {
         let direction = 'asc';
@@ -96,7 +98,7 @@ const ModernTable = ({ columns, data, searchPlaceholder = "Search...", title, lo
                     </thead>
                     <tbody className="divide-y divide-gray-50">
                         {sortedData.map((item, rowIdx) => (
-                            <tr key={item.id || rowIdx} className="hover:bg-agro-50/20 transition-colors group">
+                            <tr key={item.id || rowIdx} className="hover:bg-agro-50/20 transition-colors group relative">
                                 {columns.map((col, colIdx) => (
                                     <td key={colIdx} className="py-5 px-8">
                                         {col.render ? col.render(item) : (
@@ -104,10 +106,46 @@ const ModernTable = ({ columns, data, searchPlaceholder = "Search...", title, lo
                                         )}
                                     </td>
                                 ))}
-                                <td className="py-5 px-8 text-right">
-                                    <button className="p-2 text-gray-400 hover:text-agro-600 hover:bg-agro-50 rounded-xl transition-all">
+                                <td className="py-5 px-8 text-right relative">
+                                    <button 
+                                        onClick={() => setOpenMenuId(openMenuId === item.id ? null : item.id)}
+                                        className="p-2 text-gray-400 hover:text-agro-600 hover:bg-agro-50 rounded-xl transition-all"
+                                    >
                                         <MoreVertical className="w-5 h-5" />
                                     </button>
+
+                                    {/* Dropdown Menu - Only show if onActionClick is provided */}
+                                    {onActionClick && openMenuId === item.id && (
+                                        <div className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-gray-100 z-50 min-w-max">
+                                            <button
+                                                onClick={() => {
+                                                    onActionClick(item.id, 'approve');
+                                                    setOpenMenuId(null);
+                                                }}
+                                                className="w-full text-left px-4 py-2 text-sm font-medium text-green-600 hover:bg-green-50 flex items-center gap-2 border-b border-gray-50"
+                                            >
+                                                <CheckCircle className="w-4 h-4" /> Approve
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    onActionClick(item.id, 'reject');
+                                                    setOpenMenuId(null);
+                                                }}
+                                                className="w-full text-left px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-2 border-b border-gray-50"
+                                            >
+                                                <XCircle className="w-4 h-4" /> Reject
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    onActionClick(item.id, 'delete');
+                                                    setOpenMenuId(null);
+                                                }}
+                                                className="w-full text-left px-4 py-2 text-sm font-medium text-red-500 hover:bg-red-50 flex items-center gap-2"
+                                            >
+                                                <Trash2 className="w-4 h-4" /> Delete
+                                            </button>
+                                        </div>
+                                    )}
                                 </td>
                             </tr>
                         ))}

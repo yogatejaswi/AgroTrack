@@ -150,11 +150,40 @@ const EquipmentDetails = () => {
                                 {equipment.description || `This premium ${equipment.name} is maintained to the highest industrial standards, ensuring maximum efficiency for your agricultural operations. Ideal for both precision small-scale work and high-output industrial farming.`}
                             </p>
                         </div>
+
+                        {/* Booking Calendar Section - Moved Below Description */}
+                        <div className="mt-16 pt-12 border-t border-gray-50">
+                            <h2 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-8">Operational Calendar</h2>
+                            <div className="bg-white p-8 border border-gray-100/50 rounded-[2.5rem] shadow-lg">
+                                {equipment.availability_status === 'unavailable' ? (
+                                    <div className="bg-red-50 text-red-700 font-black p-8 rounded-3xl flex flex-col items-center justify-center border-2 border-red-100 text-center">
+                                        <Zap className="w-8 h-8 mb-4 opacity-50" />
+                                        <span className="text-lg uppercase tracking-widest">Asset Active</span>
+                                        <span className="text-[10px] font-bold opacity-60 mt-2 uppercase tracking-widest italic">Currently deployed in field</span>
+                                    </div>
+                                ) : user ? (
+                                    <BookingDatePicker equipment={equipment} onSuccess={() => navigate('/farmer-dashboard')} />
+                                ) : (
+                                    <div className="space-y-6">
+                                        <div className="bg-agro-50/50 rounded-2xl p-6 border border-agro-100 flex items-start gap-4">
+                                            <Info className="w-6 h-6 text-agro-600 shrink-0 mt-0.5" />
+                                            <p className="text-xs font-bold text-agro-800 leading-relaxed">Authorization required to access the operational calendar and secure this unit.</p>
+                                        </div>
+                                        <button
+                                            onClick={() => navigate('/login')}
+                                            className="btn-primary w-full py-5 shadow-xl shadow-agro-100"
+                                        >
+                                            Authorize & Access
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Right Column - Booking Widget Sidebar */}
+                    {/* Right Column - Pricing Widget Sidebar */}
                     <div className="lg:col-span-5 xl:col-span-4 mt-16 lg:mt-0 relative">
-                    <div className="sticky top-28 bg-white p-10 border border-gray-100/50 rounded-[2.5rem] shadow-2xl overflow-visible">
+                        <div className="sticky top-28 bg-white p-10 border border-gray-100/50 rounded-[2.5rem] shadow-2xl overflow-visible">
                             <div className="flex items-baseline justify-between mb-10">
                                 <div className="flex items-baseline gap-2">
                                     <span className="text-4xl font-black text-gray-900 italic">
@@ -163,29 +192,6 @@ const EquipmentDetails = () => {
                                     <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">/ Operational Day</span>
                                 </div>
                             </div>
-
-                            {equipment.availability_status === 'unavailable' ? (
-                                <div className="bg-red-50 text-red-700 font-black p-8 rounded-3xl flex flex-col items-center justify-center border-2 border-red-100 text-center">
-                                    <Zap className="w-8 h-8 mb-4 opacity-50" />
-                                    <span className="text-lg uppercase tracking-widest">Asset Active</span>
-                                    <span className="text-[10px] font-bold opacity-60 mt-2 uppercase tracking-widest italic">Currently deployed in field</span>
-                                </div>
-                            ) : user ? (
-                                <BookingDatePicker equipment={equipment} onSuccess={() => navigate('/farmer-dashboard')} />
-                            ) : (
-                                <div className="space-y-6">
-                                    <div className="bg-agro-50/50 rounded-2xl p-6 border border-agro-100 flex items-start gap-4">
-                                        <Info className="w-6 h-6 text-agro-600 shrink-0 mt-0.5" />
-                                        <p className="text-xs font-bold text-agro-800 leading-relaxed">Authorization required to access the operational calendar and secure this unit.</p>
-                                    </div>
-                                    <button
-                                        onClick={() => navigate('/login')}
-                                        className="btn-primary w-full py-5 shadow-xl shadow-agro-100"
-                                    >
-                                        Authorize & Access
-                                    </button>
-                                </div>
-                            )}
 
                             {/* Trust signals */}
                             <div className="mt-10 pt-10 border-t border-gray-50 flex flex-col gap-6">

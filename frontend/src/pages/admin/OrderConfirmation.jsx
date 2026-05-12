@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingCart, CheckCircle, XCircle, User, Calendar, Tag } from 'lucide-react';
+import { ShoppingCart, CheckCircle, XCircle, User, Calendar, Tag, MoreVertical, Trash2 } from 'lucide-react';
 import api from '../../services/api';
 import ModernTable from '../../components/ModernTable';
 import bookingService from '../../services/bookingService';
@@ -10,6 +10,7 @@ const OrderConfirmation = () => {
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
+    const [openMenuId, setOpenMenuId] = useState(null);
 
     useEffect(() => {
         const fetchBookings = async () => {
@@ -30,8 +31,23 @@ const OrderConfirmation = () => {
         try {
             await api.put(`/bookings/${bookingId}/status`, { status: newStatus });
             setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, status: newStatus } : b));
+            setOpenMenuId(null);
         } catch (err) {
             console.error('Failed to update status', err);
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleDeleteBooking = async (bookingId) => {
+        if (!window.confirm('Are you sure you want to delete this booking?')) return;
+        setActionLoading(true);
+        try {
+            await api.delete(`/bookings/${bookingId}`);
+            setBookings(prev => prev.filter(b => b.id !== bookingId));
+            setOpenMenuId(null);
+        } catch (err) {
+            console.error('Failed to delete booking', err);
         } finally {
             setActionLoading(false);
         }
@@ -93,34 +109,18 @@ const OrderConfirmation = () => {
                     {item.status}
                 </span>
             )
-        },
-        {
-            key: 'actions',
-            label: '',
-            render: (item) => (
-                <div className="flex justify-end gap-2">
-                    {item.status === 'pending' && (
-                        <>
-                            <button
-                                disabled={actionLoading}
-                                onClick={() => handleUpdateStatus(item.id, 'confirmed')}
-                                className="btn-secondary py-2 px-4 text-[10px] bg-green-50 text-green-700 hover:bg-green-100 border-none"
-                            >
-                                <CheckCircle className="w-3.5 h-3.5 mr-1" /> Approve
-                            </button>
-                            <button
-                                disabled={actionLoading}
-                                onClick={() => handleUpdateStatus(item.id, 'rejected')}
-                                className="btn-secondary py-2 px-4 text-[10px] bg-red-50 text-red-700 hover:bg-red-100 border-none"
-                            >
-                                <XCircle className="w-3.5 h-3.5 mr-1" /> Deny
-                            </button>
-                        </>
-                    )}
-                </div>
-            )
         }
     ];
+
+    const handleActionClick = (bookingId, action) => {
+        if (action === 'approve') {
+            handleUpdateStatus(bookingId, 'confirmed');
+        } else if (action === 'reject') {
+            handleUpdateStatus(bookingId, 'rejected');
+        } else if (action === 'delete') {
+            handleDeleteBooking(bookingId);
+        }
+    };
 
     return (
         <div className="animate-in fade-in duration-700">
@@ -135,6 +135,7 @@ const OrderConfirmation = () => {
                 data={bookings || []}
                 loading={loading}
                 searchPlaceholder="Search by ID, asset, or renter..."
+                onActionClick={handleActionClick}
             />
         </div>
     );

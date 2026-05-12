@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { cn } from '../lib/utils'; // Assuming I'll create this utility or use a simple concat
-import { isEquipmentManager } from '../utils/roles';
+import { isAdmin } from '../utils/roles';
 
 const SidebarItem = ({ to, icon: Icon, label, onClick }) => (
     <NavLink
@@ -50,6 +50,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         { to: "/admin/order-confirmation", icon: CheckSquare, label: "Orders" },
         { to: "/admin/users", icon: Users, label: "Users" },
         { to: "/admin/payments", icon: CreditCard, label: "Payments" },
+        { to: "/equipment-tracking", icon: Tractor, label: "Equipment Tracking" },
         { to: "/profile", icon: User, label: "Profile" },
     ];
 
@@ -57,10 +58,11 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         { to: "/farmer-dashboard", icon: LayoutDashboard, label: "Dashboard" },
         { to: "/marketplace", icon: ShoppingBag, label: "Marketplace" },
         { to: "/my-bookings", icon: Calendar, label: "My Bookings" },
+        { to: "/equipment-tracking", icon: Tractor, label: "Equipment Tracking" },
         { to: "/profile", icon: User, label: "Profile" },
     ];
 
-    const links = isEquipmentManager(user) ? adminLinks : farmerLinks;
+    const links = isAdmin(user) ? adminLinks : farmerLinks;
 
     return (
         <>
