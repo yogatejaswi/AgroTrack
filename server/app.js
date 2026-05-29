@@ -24,8 +24,21 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// CORS Configuration
+const corsOptions = {
+    origin: [
+        'http://localhost:3000',
+        'http://localhost:5173',
+        process.env.FRONTEND_URL,
+        'https://agro-track-mu.vercel.app'
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+};
+
 app.use(express.json());
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(passport.initialize());
 

@@ -1,123 +1,328 @@
-# AgroTrack
-Farm Equipment Rental & Asset Management System
+# AgroTrack - Agricultural Equipment Rental Platform
 
-## 🚀 Deployment on Render
+AgroTrack is a comprehensive web application that connects farmers with agricultural equipment owners, enabling easy rental and management of farming equipment.
+
+## Features
+
+- **Equipment Marketplace** - Browse and search available agricultural equipment
+- **Booking System** - Reserve equipment for specific dates
+- **Payment Integration** - Secure payment processing
+- **User Management** - Farmer and equipment owner profiles
+- **Admin Dashboard** - Manage users, equipment, and bookings
+- **Notifications** - Real-time updates on bookings and rentals
+- **Reviews & Ratings** - Community feedback on equipment and owners
+- **Wishlist** - Save favorite equipment for later
+- **Damage Reports** - Track and manage equipment damage claims
+
+## Tech Stack
+
+### Frontend
+- React.js
+- Vite
+- Tailwind CSS
+- Axios for API calls
+
+### Backend
+- Node.js
+- Express.js
+- MongoDB (Atlas)
+- Mongoose ODM
+- JWT Authentication
+- Passport.js (Google OAuth)
+
+### Database
+- MongoDB Atlas (Cloud)
+
+## Project Structure
+
+```
+agrotrack-main/
+├── client/                 # React frontend
+│   ├── src/
+│   │   ├── components/    # Reusable components
+│   │   ├── pages/         # Page components
+│   │   ├── services/      # API services
+│   │   ├── context/       # React context
+│   │   └── hooks/         # Custom hooks
+│   └── package.json
+│
+├── server/                # Node.js backend
+│   ├── config/           # Configuration files
+│   ├── controllers/       # Route controllers
+│   ├── models/           # Mongoose schemas
+│   ├── routes/           # API routes
+│   ├── middleware/       # Custom middleware
+│   ├── utils/            # Utility functions
+│   ├── .env              # Environment variables
+│   └── package.json
+│
+└── README.md
+```
+
+## Installation
 
 ### Prerequisites
-- Node.js (v16 or higher)
+- Node.js (v14 or higher)
 - npm or yarn
-- Render account (https://render.com)
+- MongoDB Atlas account
+- Git
 
-### Local Development Setup
+### Backend Setup
 
-#### Backend
-1. Navigate to the `server` directory: `cd server`
-2. Install dependencies: `npm install`
-3. Copy environment file: `cp .env.example .env` and fill in your values
-4. Start the development server: `npm run dev` (Runs on `http://localhost:5000`)
+1. Navigate to server directory:
+```bash
+cd server
+```
 
-#### Frontend
-1. Navigate to the `frontend` directory: `cd frontend`
-2. Install dependencies: `npm install`
-3. Start the development server: `npm run dev` (Runs on `http://localhost:5173`)
+2. Install dependencies:
+```bash
+npm install
+```
 
-### Production Deployment
+3. Create `.env` file with the following variables:
+```env
+PORT=5001
+NODE_ENV=production
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/AgroTrack?retryWrites=true&w=majority
+JWT_SECRET=your_jwt_secret_key
+EMAIL_USER=your_email@gmail.com
+EMAIL_PASS=your_email_app_password
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_CALLBACK_URL=https://your-domain.com/api/auth/google/callback
+FRONTEND_URL=https://your-frontend-url.com
+```
 
-#### Step 1: Database Setup
-Since Render provides PostgreSQL by default, you'll need to either:
-- Use Render's PostgreSQL database and migrate your MySQL schema
-- Use a cloud MySQL service like PlanetScale or AWS RDS
+4. Start the server:
+```bash
+npm run dev
+```
 
-For this deployment, we'll use Render's PostgreSQL. Update your database configuration accordingly.
+The server will run on `http://localhost:5001`
 
-#### Step 2: Deploy to Render
+### Frontend Setup
 
-1. **Connect your GitHub repository** to Render
-2. **Create a new Blueprint** (multi-service deployment):
-   - Go to Render Dashboard → New → Blueprint
-   - Connect your GitHub repo: `joyboy-57-art/agrotrack`
-   - Render will automatically detect the `render.yaml` file
+1. Navigate to client directory:
+```bash
+cd client
+```
 
-3. **Configure Environment Variables** in Render:
-   ```
-   NODE_ENV=production
-   PORT=10000
-   DB_HOST=your_render_db_host
-   DB_USER=your_render_db_user
-   DB_PASSWORD=your_render_db_password
-   DB_NAME=your_render_db_name
-   JWT_SECRET=your_secure_jwt_secret
-   FAST2SMS_API_KEY=your_fast2sms_key
-   EMAIL_USER=your_email@gmail.com
-   EMAIL_PASS=your_app_password
-   VITE_API_URL=https://your-backend-service.onrender.com
-   ```
+2. Install dependencies:
+```bash
+npm install
+```
 
-4. **Deploy**: Click "Create Blueprint" and Render will deploy all services
+3. Create `.env.production` file:
+```env
+VITE_API_URL=http://localhost:5001/api
+```
 
-#### Step 3: Database Migration
-After deployment, run your database initialization scripts:
-- `init_db.sql`
-- `mysql_init.sql`
+4. Start the development server:
+```bash
+npm run dev
+```
 
-### Services Overview
+The frontend will run on `http://localhost:3000`
 
-- **Backend API**: `https://agrotrack-backend.onrender.com`
-- **Frontend**: `https://agrotrack-frontend.onrender.com`
-- **Client**: `https://agrotrack-client.onrender.com`
-- **Database**: Render PostgreSQL
+## API Endpoints
 
-### Default Users (Passwords: `password123`)
-- `admin@agrotrack.com` (Admin)
-- `ramesh@agrotrack.com` (Equipment Owner)
-- `suresh@agrotrack.com` (Farmer)
+### Authentication
+- `POST /api/auth/register` - Register new user
+- `POST /api/auth/login` - Login user
+- `POST /api/auth/forgot-password` - Request password reset
+- `POST /api/auth/verify-otp` - Verify OTP
+- `POST /api/auth/reset-password` - Reset password
 
-### Environment Variables Reference
+### Equipment
+- `GET /api/equipment` - Get all available equipment
+- `GET /api/equipment/:id` - Get equipment details
+- `POST /api/equipment` - Create new equipment (owner only)
+- `PUT /api/equipment/:id` - Update equipment (admin/owner)
+- `DELETE /api/equipment/:id` - Delete equipment (admin)
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `PORT` | Server port | `10000` |
-| `DB_HOST` | Database host | `your-db-host.render.com` |
-| `DB_USER` | Database user | `your_db_user` |
-| `DB_PASSWORD` | Database password | `your_secure_password` |
-| `DB_NAME` | Database name | `agrotrack` |
-| `JWT_SECRET` | JWT signing secret | `your_jwt_secret` |
-| `FAST2SMS_API_KEY` | SMS service API key | `your_api_key` |
-| `EMAIL_USER` | Email address | `your@email.com` |
-| `EMAIL_PASS` | App password | `your_app_password` |
+### Bookings
+- `GET /api/bookings` - Get all bookings (admin)
+- `GET /api/bookings/user/:userId` - Get user's bookings
+- `POST /api/bookings` - Create new booking
+- `PUT /api/bookings/:id` - Update booking status
+- `DELETE /api/bookings/:id` - Cancel booking
 
-### Troubleshooting
+### Payments
+- `POST /api/payments` - Create payment
+- `GET /api/payments/:id` - Get payment details
+- `PUT /api/payments/:id` - Update payment status
 
-1. **Build Failures**: Check the build logs in Render dashboard
-2. **Database Connection**: Ensure your database credentials are correct
-3. **CORS Issues**: Update `FRONTEND_URL` in environment variables
-4. **Port Issues**: Render assigns random ports, use the `PORT` env var
+### Reviews
+- `GET /api/reviews/equipment/:id` - Get equipment reviews
+- `POST /api/reviews` - Create review
+- `PUT /api/reviews/:id` - Update review
+- `DELETE /api/reviews/:id` - Delete review
 
-### Support
-For issues with deployment, check:
-- Render documentation: https://docs.render.com/
-- Application logs in Render dashboard
-- GitHub repository issues
+### Wishlist
+- `GET /api/wishlist` - Get user's wishlist
+- `POST /api/wishlist` - Add to wishlist
+- `DELETE /api/wishlist/:id` - Remove from wishlist
+
+### Admin
+- `GET /api/admin/users` - Get all users
+- `GET /api/admin/equipment` - Get all equipment
+- `GET /api/admin/bookings` - Get all bookings
+- `GET /api/admin/analytics` - Get analytics data
+
+## Database Models
+
+### User
+- name, email, password, role, mobile_number
+- Roles: farmer, equipment_owner, admin
+
+### Equipment
+- name, category, price_per_day, location, description
+- image_url, owner_id, availability_status
+
+### Booking
+- user_id, equipment_id, start_date, end_date
+- total_cost, status, payment_status
+
+### Payment
+- payment_id, user_id, booking_id, total_amount
+- payment_method, payment_status, transaction_id
+
+### Review
+- user_id, equipment_id, booking_id, rating, comment
+
+### Notification
+- user_id, message, type, is_read
+
+### Wishlist
+- user_id, equipment_id
+
+### DamageReport
+- booking_id, equipment_id, user_id, report_type
+- description, severity, images_url, status
+
+## Authentication
+
+The application uses JWT (JSON Web Tokens) for authentication. Users can:
+- Register with email and password
+- Login with credentials
+- Login with Google OAuth
+- Reset password via email OTP
+
+## Environment Variables
+
+### Required
+- `MONGODB_URI` - MongoDB connection string
+- `JWT_SECRET` - Secret key for JWT tokens
+- `PORT` - Server port (default: 5001)
+
+### Optional
+- `EMAIL_USER` - Email for sending notifications
+- `EMAIL_PASS` - Email app password
+- `GOOGLE_CLIENT_ID` - Google OAuth client ID
+- `GOOGLE_CLIENT_SECRET` - Google OAuth client secret
+- `GOOGLE_CALLBACK_URL` - Google OAuth callback URL
+- `FRONTEND_URL` - Frontend URL for CORS
+
+## Running the Application
+
+### Development Mode
+
+Terminal 1 - Backend:
+```bash
+cd server
+npm run dev
+```
+
+Terminal 2 - Frontend:
+```bash
+cd client
+npm run dev
+```
+
+### Production Mode
+
+Backend:
+```bash
+cd server
+npm start
+```
+
+Frontend:
+```bash
+cd client
+npm run build
+npm run preview
+```
+
+## Database Migration
+
+If migrating from MySQL to MongoDB:
+
+1. Ensure both databases are accessible
+2. Update `.env` with MongoDB URI and MySQL credentials
+3. Run migration script:
+```bash
+node migrate_mysql_to_mongodb.js
+```
+
+## Troubleshooting
+
+### MongoDB Connection Error
+- Verify MongoDB Atlas credentials
+- Add your IP to MongoDB Atlas IP whitelist
+- Check connection string format
+
+### API Not Responding
+- Ensure backend server is running on port 5001
+- Check CORS settings in Express
+- Verify environment variables are set
+
+### Frontend Not Loading Data
+- Check browser console for errors
+- Verify API endpoint URLs
+- Check network tab in browser DevTools
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the ISC License.
+
+## Support
+
+For support, email support@agrotrack.com or open an issue in the repository.
+
+## Deployment
+
+### Backend (Render/Heroku)
+1. Push code to GitHub
+2. Connect repository to Render/Heroku
+3. Set environment variables
+4. Deploy
+
+### Frontend (Vercel)
+1. Push code to GitHub
+2. Connect repository to Vercel
+3. Set build settings
+4. Deploy
+
+## Future Enhancements
+
+- Mobile app (React Native)
+- Real-time chat between users
+- Advanced analytics dashboard
+- Equipment maintenance tracking
+- Insurance integration
+- GPS tracking for equipment
+- Multi-language support
 
 ---
 
-## Local Development (Alternative)
-
-### Prerequisites
-- Node.js (v16 or higher)
-- npm or yarn
-
-### Setup Instructions
-
-#### Backend
-1. Navigate to `server` directory
-2. Install dependencies: `npm install`
-3. Setup environment: copy `.env.example` to `.env`
-4. Start server: `npm run dev`
-
-#### Frontend
-1. Navigate to `frontend` directory
-2. Install dependencies: `npm install`
-3. Start dev server: `npm run dev`
-
-Enjoy! 🌾
+**Last Updated**: May 29, 2026
+**Version**: 1.0.0
