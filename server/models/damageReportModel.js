@@ -1,59 +1,56 @@
-import pool from '../config/db.js';
+import mongoose from 'mongoose';
 
-const DamageReport = {
-    create: async (data) => {
-        const { booking_id, equipment_id, user_id, report_type, description, severity, images_url, status = 'pending' } = data;
-        
-        const [result] = await pool.query(
-            'INSERT INTO damage_reports (booking_id, equipment_id, user_id, report_type, description, severity, images_url, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-            [booking_id, equipment_id, user_id, report_type, description, severity, images_url, status]
-        );
-        return { id: result.insertId, ...data };
+const damageReportSchema = new mongoose.Schema({
+    booking_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Booking',
+        required: true,
     },
-
-    getByBookingId: async (bookingId) => {
-        const [rows] = await pool.query(
-            `SELECT dr.*, u.name as reported_by, e.name as equipment_name 
-             FROM damage_reports dr
-             JOIN users u ON dr.user_id = u.id
-             JOIN equipment e ON dr.equipment_id = e.id
-             WHERE dr.booking_id = ?`,
-            [bookingId]
-        );
-        return rows;
+    equipment_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Equipment',
+        required: true,
     },
-
-    getByEquipmentId: async (equipmentId) => {
-        const [rows] = await pool.query(
-            `SELECT dr.*, u.name as reported_by, b.id as booking_id 
-             FROM damage_reports dr
-             JOIN users u ON dr.user_id = u.id
-             JOIN bookings b ON dr.booking_id = b.id
-             WHERE dr.equipment_id = ?
-             ORDER BY dr.created_at DESC`,
-            [equipmentId]
-        );
-        return rows;
+    user_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
     },
-
-    updateStatus: async (id, status, resolution_notes) => {
-        await pool.query(
-            'UPDATE damage_reports SET status = ?, resolution_notes = ? WHERE id = ?',
-            [status, resolution_notes, id]
-        );
-        return { id, status };
+    report_type: {
+        type: String,
+        enum: ['damage', 'missing_parts', 'malfunction'],
+        required: true,
     },
+    description: {
+        type: String,
+        required: true,
+    },
+    severity: {
+        type: String,
+        enum: ['low', 'medium', 'high'],
+        required: true,
+    },
+    images_url: {
+        type: [String],
+    },
+    status: {
+        type: String,
+        enum: ['pending', 'under_review', 'resolved', 'rejected'],
+        default: 'pending',
+    },
+    resolution_notes: {
+        type: String,
+    },
+    created_at: {
+        type: Date,
+        default: Date.now,
+    },
+    updated_at: {
+        type: Date,
+        default: Date.now,
+    },
+});
 
-    getAll: async () => {
-        const [rows] = await pool.query(
-            `SELECT dr.*, u.name as reported_by, e.name as equipment_name 
-             FROM damage_reports dr
-             JOIN users u ON dr.user_id = u.id
-             JOIN equipment e ON dr.equipment_id = e.id
-             ORDER BY dr.created_at DESC`
-        );
-        return rows;
-    }
-};
+const DamageReport = mongoose.model('DamageReport', damageReportSchema);
 
 export default DamageReport;

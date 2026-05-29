@@ -1,5 +1,6 @@
 import cron from 'node-cron';
-import pool from '../config/db.js';
+import Booking from '../models/bookingModel.js';
+import Equipment from '../models/equipmentModel.js';
 import { createSystemNotification } from '../controllers/notificationController.js';
 
 export const startCronJobs = () => {
@@ -9,11 +10,10 @@ export const startCronJobs = () => {
 
         try {
             // Find bookings that have passed their end_date and are still confirmed
-            const [expiredBookings] = await pool.query(`
-                SELECT id, user_id, equipment_id, end_date 
-                FROM bookings 
-                WHERE status = 'confirmed' AND end_date < CURDATE()
-            `);
+            const expiredBookings = await Booking.find({
+                status: 'confirmed',
+                end_date: { $lt: new Date() }
+            });
 
             if (expiredBookings.length === 0) {
                 console.log('✅ No expired bookings found. Check complete.');
@@ -24,10 +24,14 @@ export const startCronJobs = () => {
 
             for (const booking of expiredBookings) {
                 // 1. Mark booking as completed
-                await pool.query('UPDATE bookings SET status = ? WHERE id = ?', ['completed', booking.id]);
+                booking.status = 'completed';
+                await booking.save();
 
                 // 2. Mark equipment as available
-                await pool.query('UPDATE equipment SET availability_status = ? WHERE id = ?', ['available', booking.equipment_id]);
+                await Equipment.findByIdAndUpdate(
+                    booking.equipment_id,
+                    { availability_status: 'available' }
+                );
 
                 // 3. Notify user
                 await createSystemNotification(

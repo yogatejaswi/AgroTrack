@@ -1,55 +1,46 @@
-import pool from '../config/db.js';
+import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
-const User = {
-    create: async (name, email, password, role = 'farmer', mobile_number) => {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const [result] = await pool.query(
-            'INSERT INTO users (name, email, password, role, mobile_number) VALUES (?, ?, ?, ?, ?)',
-            [name, email, hashedPassword, role, mobile_number]
-        );
-        return { id: result.insertId, name, email, role, mobile_number };
+const userSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true,
     },
-
-    findByEmail: async (email) => {
-        const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
-        return rows[0];
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        lowercase: true,
     },
-
-    findById: async (id) => {
-        const [rows] = await pool.query('SELECT id, name, email, role, mobile_number, created_at FROM users WHERE id = ?', [id]);
-        return rows[0];
+    password: {
+        type: String,
+        required: true,
     },
-
-    getPasswordById: async (id) => {
-        const [rows] = await pool.query('SELECT password FROM users WHERE id = ?', [id]);
-        return rows[0]?.password;
+    role: {
+        type: String,
+        enum: ['farmer', 'equipment_owner', 'admin'],
+        default: 'farmer',
     },
-
-    checkDuplicateEmailOrMobile: async (id, email, mobile_number) => {
-        const [rows] = await pool.query(
-            'SELECT id FROM users WHERE (email = ? OR mobile_number = ?) AND id != ?',
-            [email, mobile_number, id]
-        );
-        return rows.length > 0;
+    mobile_number: {
+        type: String,
+        unique: true,
+        sparse: true,
     },
+    created_at: {
+        type: Date,
+        default: Date.now,
+    },
+    updated_at: {
+        type: Date,
+        default: Date.now,
+    },
+});
 
-    updateProfile: async (id, data) => {
-        let sql = 'UPDATE users SET name = ?, email = ?, mobile_number = ?';
-        let params = [data.name, data.email, data.mobile_number];
-
-        if (data.password) {
-            sql += ', password = ?';
-            const hashedPassword = await bcrypt.hash(data.password, 10);
-            params.push(hashedPassword);
-        }
-
-        sql += ' WHERE id = ?';
-        params.push(id);
-
-        await pool.query(sql, params);
-        return { id, name: data.name, email: data.email, mobile_number: data.mobile_number };
-    }
+// Method to compare passwords
+userSchema.methods.comparePassword = async function (password) {
+    return await bcrypt.compare(password, this.password);
 };
+
+const User = mongoose.model('User', userSchema);
 
 export default User;

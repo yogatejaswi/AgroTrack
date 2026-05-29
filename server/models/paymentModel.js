@@ -1,25 +1,48 @@
-import pool from '../config/db.js';
+import mongoose from 'mongoose';
 
-const Payment = {
-    create: async (data) => {
-        const { payment_id, user_id, booking_id, total_amount, payment_method, payment_status, transaction_id } = data;
-
-        const [result] = await pool.query(
-            'INSERT INTO payments (payment_id, user_id, booking_id, total_amount, payment_method, payment_status, transaction_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [payment_id, user_id, booking_id, total_amount, payment_method, payment_status, transaction_id]
-        );
-        return { id: result.insertId, ...data };
+const paymentSchema = new mongoose.Schema({
+    payment_id: {
+        type: String,
+        unique: true,
+        required: true,
     },
-
-    getByBookingId: async (bookingId) => {
-        const [rows] = await pool.query('SELECT * FROM payments WHERE booking_id = ?', [bookingId]);
-        return rows[0];
+    user_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
     },
+    booking_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Booking',
+        required: true,
+    },
+    total_amount: {
+        type: Number,
+        required: true,
+    },
+    payment_method: {
+        type: String,
+        enum: ['credit_card', 'debit_card', 'upi', 'net_banking'],
+        required: true,
+    },
+    payment_status: {
+        type: String,
+        enum: ['pending', 'completed', 'failed', 'refunded'],
+        default: 'pending',
+    },
+    transaction_id: {
+        type: String,
+    },
+    created_at: {
+        type: Date,
+        default: Date.now,
+    },
+    updated_at: {
+        type: Date,
+        default: Date.now,
+    },
+});
 
-    updateStatus: async (paymentId, status) => {
-        await pool.query('UPDATE payments SET payment_status = ? WHERE payment_id = ?', [status, paymentId]);
-        return { paymentId, status };
-    }
-};
+const Payment = mongoose.model('Payment', paymentSchema);
 
 export default Payment;

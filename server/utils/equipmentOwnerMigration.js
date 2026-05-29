@@ -1,4 +1,5 @@
-import pool from '../config/db.js';
+import Equipment from '../models/equipmentModel.js';
+import User from '../models/userModel.js';
 
 /**
  * Migration script to assign owner_id to equipment
@@ -9,9 +10,7 @@ export const migrateEquipmentOwners = async () => {
         console.log('🔄 Starting equipment owner migration...');
 
         // Get all equipment without owner_id
-        const [equipmentWithoutOwner] = await pool.query(
-            'SELECT id, name FROM equipment WHERE owner_id IS NULL'
-        );
+        const equipmentWithoutOwner = await Equipment.find({ owner_id: null });
 
         if (equipmentWithoutOwner.length === 0) {
             console.log('✅ All equipment already has owner_id assigned.');
@@ -21,24 +20,18 @@ export const migrateEquipmentOwners = async () => {
         console.log(`Found ${equipmentWithoutOwner.length} equipment items without owner_id`);
 
         // Get the first admin user (or any user) to assign as owner
-        const [users] = await pool.query(
-            'SELECT id FROM users WHERE role = "admin" LIMIT 1'
-        );
+        const adminUser = await User.findOne({ role: 'admin' });
 
-        if (users.length === 0) {
+        if (!adminUser) {
             console.warn('⚠️ No admin user found. Skipping migration.');
             return;
         }
 
-        const adminId = users[0].id;
-
         // Assign all equipment without owner to the admin
         for (const equipment of equipmentWithoutOwner) {
-            await pool.query(
-                'UPDATE equipment SET owner_id = ? WHERE id = ?',
-                [adminId, equipment.id]
-            );
-            console.log(`✅ Assigned equipment "${equipment.name}" (ID: ${equipment.id}) to admin user (ID: ${adminId})`);
+            equipment.owner_id = adminUser._id;
+            await equipment.save();
+            console.log(`✅ Assigned equipment "${equipment.name}" (ID: ${equipment._id}) to admin user (ID: ${adminUser._id})`);
         }
 
         console.log('✅ Equipment owner migration completed successfully.');
@@ -52,12 +45,13 @@ export const migrateEquipmentOwners = async () => {
  */
 export const assignEquipmentToUser = async (equipmentId, userId) => {
     try {
-        const [result] = await pool.query(
-            'UPDATE equipment SET owner_id = ? WHERE id = ?',
-            [userId, equipmentId]
+        const equipment = await Equipment.findByIdAndUpdate(
+            equipmentId,
+            { owner_id: userId },
+            { new: true }
         );
 
-        if (result.affectedRows === 0) {
+        if (!equipment) {
             throw new Error('Equipment not found');
         }
 

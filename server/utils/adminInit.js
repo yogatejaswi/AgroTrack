@@ -5,42 +5,48 @@ export const ensureAdminExists = async () => {
     try {
         // First admin account
         const adminEmail1 = 'viveklawrence11@gmail.com';
-        const existingAdmin1 = await User.findByEmail(adminEmail1);
+        const existingAdmin1 = await User.findOne({ email: adminEmail1 });
 
         if (!existingAdmin1) {
             console.log('👷 Admin account missing. Creating default admin...');
 
-            // Password 'viveks' will be hashed inside User.create
-            await User.create(
-                'Vivek Lawrence',
-                adminEmail1,
-                'viveks',
-                'admin',
-                '9876543210'
-            );
-
-            console.log('✅ Default admin account created successfully.');
+            try {
+                const hashedPassword1 = await bcrypt.hash('viveks', 10);
+                await User.create({
+                    name: 'Vivek Lawrence',
+                    email: adminEmail1,
+                    password: hashedPassword1,
+                    role: 'admin',
+                    mobile_number: '9876543210'
+                });
+                console.log('✅ Default admin account created successfully.');
+            } catch (err) {
+                console.error('Error creating admin1:', err.message);
+            }
         } else {
             console.log('✅ Admin account already exists.');
         }
 
         // Second admin account
         const adminEmail2 = 'yogatejaswi@gmail.com';
-        const existingAdmin2 = await User.findByEmail(adminEmail2);
+        const existingAdmin2 = await User.findOne({ email: adminEmail2 });
 
         if (!existingAdmin2) {
             console.log('👷 Creating additional admin account...');
 
-            // Password 'yoga' will be hashed inside User.create
-            await User.create(
-                'Yoga Tejaswi',
-                adminEmail2,
-                'yoga',
-                'admin',
-                '9876543211'
-            );
-
-            console.log('✅ Additional admin account created successfully.');
+            try {
+                const hashedPassword2 = await bcrypt.hash('yoga', 10);
+                await User.create({
+                    name: 'Yoga Tejaswi',
+                    email: adminEmail2,
+                    password: hashedPassword2,
+                    role: 'admin',
+                    mobile_number: '9876543211'
+                });
+                console.log('✅ Additional admin account created successfully.');
+            } catch (err) {
+                console.error('Error creating admin2:', err.message);
+            }
         } else {
             console.log('✅ Admin account yogatejaswi@gmail.com already exists.');
         }

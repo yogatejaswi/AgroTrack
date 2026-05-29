@@ -1,26 +1,21 @@
-import mysql from 'mysql2/promise';
+import mongoose from 'mongoose';
 
 // By the time this module is loaded, dotenv has already been configured
 // by config/env.js which is imported first in server.js
-const pool = mysql.createPool({
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '5056',
-    database: process.env.DB_NAME || 'agrotrack',
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-});
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/agrotrack';
 
-// Test connection
-(async () => {
+// Connect to MongoDB
+const connectDB = async () => {
     try {
-        const connection = await pool.getConnection();
-        console.log('✅ MySQL Database connected successfully');
-        connection.release();
+        await mongoose.connect(MONGODB_URI);
+        console.log('✅ MongoDB Database connected successfully');
     } catch (error) {
         console.error('❌ Error connecting to the database:', error.message);
+        process.exit(1);
     }
-})();
+};
 
-export default pool;
+// Call connection on import
+connectDB();
+
+export default mongoose;
